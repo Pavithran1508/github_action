@@ -1,35 +1,43 @@
-name: Auto Merge Feature to Main
+name: Update File on Feature Branch
 
 on:
   push:
     branches:
-      - feature  # Trigger the workflow when changes are pushed to the feature branch
+      - main  # Trigger workflow when there's a push to the `main` branch
+
+  workflow_dispatch:  # Allow manual triggering of the workflow
 
 jobs:
-  auto-merge:
+  update-file:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    # Checkout the repository
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      # Step 2: Configure Git
-      - name: Set up Git
-        run: |
-          git config user.name "Pavithran1508"
-          git config user.email "pavithrang4@gmail.com"
+    # Set up Git user
+    - name: Set up Git user
+      run: |
+        git config --global user.name "Pavithran1508"
+        git config --global user.email "pavithrang4@gmail.com"
 
-      # Step 3: Merge feature branch into main
-      - name: Merge feature into main
-        run: |
-          git checkout main  # Switch to the main branch
-          git pull origin main  # Ensure the main branch is up to date
-          git merge feature  # Merge the feature branch into main
-          git push origin main  # Push the updated main branch to the remote repository
+    # Create or update the file
+    - name: Create or Update a File
+      run: |
+        FILE_PATH="example-file.txt"  # Set the path to the file you want to modify
+        echo "This is an updated line of content added on $(date)." >> $FILE_PATH  # Append a new line with the current date
+        git add $FILE_PATH
 
-      # Step 4: Handle conflicts (optional step for failure notification)
-      - name: Check for merge conflicts
-        if: failure()
-        run: |
-          echo "Merge conflicts detected. Please resolve conflicts manually."
+    # Commit the changes
+    - name: Commit changes
+      run: |
+        git commit -m "Update example-file.txt with new content" || echo "No changes to commit"
+
+    # Push changes to feature branch
+    - name: Push changes to feature branch
+      run: |
+        FEATURE_BRANCH="feature"
+        git fetch origin $FEATURE_BRANCH || echo "Branch does not exist. Creating it."
+        git checkout -b $FEATURE_BRANCH || git checkout $FEATURE_BRANCH
+        git push origin HEAD:$FEATURE_BRANCH
