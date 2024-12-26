@@ -1,0 +1,35 @@
+name: Auto Merge Feature to Main
+
+on:
+  push:
+    branches:
+      - feature  # Trigger the workflow when changes are pushed to the feature branch
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Configure Git
+      - name: Set up Git
+        run: |
+          git config user.name "Pavithran1508"
+          git config user.email "pavithrang4@gmail.com"
+
+      # Step 3: Merge feature branch into main
+      - name: Merge feature into main
+        run: |
+          git checkout main  # Switch to the main branch
+          git pull origin main  # Ensure the main branch is up to date
+          git merge feature  # Merge the feature branch into main
+          git push origin main  # Push the updated main branch to the remote repository
+
+      # Step 4: Handle conflicts (optional step for failure notification)
+      - name: Check for merge conflicts
+        if: failure()
+        run: |
+          echo "Merge conflicts detected. Please resolve conflicts manually."
